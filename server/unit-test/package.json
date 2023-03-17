@@ -1,0 +1,12 @@
+{
+  "name": "unit-test",
+  "version": "1.0.0",
+  "description": "",
+  "author": "Adrien Moreau",
+  "license": "ISC",
+  "dependencies": {
+    "glob": "^8.0.3",
+    "mocha": "^10.1.0",
+    "pactum": "^3.2.4"
+  }
+}

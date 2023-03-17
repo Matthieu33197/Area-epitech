@@ -1,0 +1,50 @@
+version: "3.4"
+services:
+  app:
+    container_name: area_app
+    build:
+      context: ./flutter
+      dockerfile: Dockerfile
+    image: area/app
+    volumes:
+      - ./app-apk/:/usr/src/app/build/app/outputs/flutter-apk/
+    stdin_open: true
+  backend:
+    container_name: area_bend
+    restart: unless-stopped
+    depends_on:
+    - dbpostgres
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    image: area/bend
+    volumes:
+      - ./server/log/:/usr/src/app/log/
+    ports:
+      - "8079:8079"
+      - "8080:8080"
+    #stdin_open: true
+    links:
+      - dbpostgres
+  dbpostgres:
+    container_name: area_data
+    image: postgres:alpine
+    volumes:
+      - ./server/prisma/db/:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: pguser
+      POSTGRES_PASSWORD: pguser
+      POSTGRES_DB: pgdb
+  front:
+    build:
+      context: ./areasite
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    container_name: react-ui
+    volumes:
+       - ./areasite:/usr/src/app/areasite
+       - /areasite/node_modules
+       - ./app-apk/:/app-apk

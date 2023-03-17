@@ -1,0 +1,108 @@
+generator client {
+    provider      = "prisma-client-js"
+    binaryTargets = ["native", "linux-musl", "debian-openssl-1.1.x", "linux-arm64-openssl-1.1.x"]
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = "postgresql://pguser:pguser@dbpostgres/prisma"
+}
+
+model User {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    username  String   @unique
+    email     String   @unique
+    password  String
+    name      String?  //non mandatory
+    lstName   String?  //non mandatory
+    token     String   @unique @default(uuid())
+    avatar    String?  //non mandatory
+    role      Role     @default(USER)
+    exApi     EX_API[]
+    job       Job[]
+    services  Services[]
+}
+
+model EX_API {
+    id        Int      @id @default(autoincrement())
+    service   Service  //@default(UNKNOWN)
+    token     String   //@unique
+    disableAt BigInt?  @db.BigInt
+    acstoken  String?  @unique
+    rfstoken  String?  //@unique
+    is_mobile Boolean  @default(false)
+    user      User?    @relation(fields: [userToken], references: [token])
+    userToken String?
+    @@unique([service, userToken])
+}
+
+model Job {
+    id                 Int      @id @default(autoincrement())
+    jobToken           String   @unique @default(uuid())
+    name               String
+    actionService      Service
+    action             String
+    actionArg          Action_arg[]
+    reactionService    Service
+    reaction           String
+    reactionArg        Reaction_arg[]
+    interval           Int     //seconds
+    is_stoped          Boolean  @default(false)
+    user               User?    @relation(fields: [userToken], references: [token])
+    userToken          String?
+    @@unique([jobToken, userToken])
+}
+
+model Services {
+    id        Int      @id @default(autoincrement())
+    service   Service  //@default(UNKNOWN)
+    oauth     Int      //@default(-1)
+    user      User?    @relation(fields: [userToken], references: [token])
+    userToken String?
+    @@unique([service, userToken])
+}
+
+model Action_arg {
+    id        Int      @id @default(autoincrement())
+    key       String
+    value     String
+    job       Job?     @relation(fields: [jobToken], references: [jobToken])
+    jobToken  String?
+    @@unique([key, jobToken])
+}
+
+model Reaction_arg {
+    id        Int      @id @default(autoincrement())
+    key       String
+    value     String
+    job       Job?     @relation(fields: [jobToken], references: [jobToken])
+    jobToken  String?
+    @@unique([key, jobToken])
+}
+
+enum Role {
+    USER
+    ADMIN
+}
+
+enum Service {
+    REDDIT
+    GOOGLE
+    DISCORD
+    YOUTUBE
+    WEATHER
+    EMAIL
+    TWITCH
+    COVID
+    RANDOM_API
+    CAT
+    CHUCK_NORRIS
+    DOGGO
+    FOX
+    NASA
+    POEMIST
+    SHIBA_INU
+    WAIFU
+    NEWS
+}
